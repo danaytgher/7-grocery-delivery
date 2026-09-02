@@ -60,14 +60,14 @@ export interface OrderItem {
 }
 
 export interface DeliveryPartner {
-    _id: string;
-    name: string;
-    email: string;
-    phone: string;
-    avatar: string;
-    vehicleType: "bike" | "scooter" | "car";
-    isActive: boolean;
-    createdAt: string;
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatar?: string;
+  vehicleType?: "bike" | "scooter" | "car";
+  isActive?: boolean;
+  createdAt?: string;
 }
 
 export interface Order {
