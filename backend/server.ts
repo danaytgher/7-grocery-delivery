@@ -17,7 +17,7 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 
-const port = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Server is Live!');
@@ -36,4 +36,8 @@ app.use((error: any, req:Request, res: Response, next: NextFunction)=> {
     console.error(error)
     res.status(500).json({message: error.message})
 })
-export default app;
+
+
+app.listen(PORT, ()=>{
+    console.log(`server is running on port ${PORT}`)
+})
