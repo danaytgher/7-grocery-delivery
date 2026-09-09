@@ -15,7 +15,7 @@ import CheckoutPayment from "../components/Checkout/CheckoutPayment";
 import CheckoutReview from "../components/Checkout/CheckoutReview";
 import toast from "react-hot-toast";
 import api from "../config/api";
-import { useAuth } from "../context/authContex";
+import { useAuth } from "../context/AuthContext";
 
 
 const CheckOut = () => {

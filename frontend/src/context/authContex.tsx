@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import api from "../config/api";
+import api from "../config/api"; 
 import type { User } from "../types";
+import toast from "react-hot-toast";
+import type { ReactNode } from "react";
 
 interface AuthContextType {
   user: User | null;

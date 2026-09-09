@@ -5,7 +5,7 @@ import Loading from "../components/Loading";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import AddressCard from "../components/AddressCard";
 import AddressForm from "../components/AddressForm";
-import { useAuth } from "../context/authContex";
+import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import api from "../config/api";
 
