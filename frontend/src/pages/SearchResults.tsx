@@ -4,7 +4,8 @@ import { useSearchParams, Link } from "react-router-dom"
 import { Home, Search } from "lucide-react" // Or your icon import
 import ProductCard from "../components/ProductCard" // Adjust import path as needed
 import Loading from "../components/Loading" // Adjust import path as needed
-import { dummyProducts } from "../assets/assets" // Adjust import path as needed
+import api from "../config/api"
+import toast from "react-hot-toast"
 
 const SearchResults = () => {
   const [products, setProducts] = useState<Product[]>([])
@@ -12,12 +13,21 @@ const SearchResults = () => {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('q') || ""
 
-  useEffect(() => {
-    if (!query) return;
-    setLoading(true)
-    setProducts(dummyProducts.filter((p: any) => p.name.toLowerCase().includes(query.toLowerCase())))
-    setLoading(false)
-  }, [query])
+ useEffect(() => {
+  if (!query) return;
+
+  setLoading(true);
+
+  api
+    .get(`/products?search=${encodeURIComponent(query)}`)
+    .then((res) => setProducts(res.data.products))
+    .catch((error: any) => {
+      toast.error(
+        error.response?.data?.message || error.message
+      );
+    })
+    .finally(() => setLoading(false));
+}, [query]);
 
   return (
     <div className="min-h-screen bg-app-cream">
@@ -60,7 +70,7 @@ const SearchResults = () => {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((product) => (
-              <ProductCard key={product._id} product={product} />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         )}

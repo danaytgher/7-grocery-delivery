@@ -5,8 +5,12 @@ import Loading from "../components/Loading";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import AddressCard from "../components/AddressCard";
 import AddressForm from "../components/AddressForm";
+import { useAuth } from "../context/authContex";
+import toast from "react-hot-toast";
+import api from "../config/api";
 
 const Addresses = () => {
+  const {updateUser} = useAuth()
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -33,9 +37,105 @@ const Addresses = () => {
     setEditingId(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-  };
+
+const getLocation = (retries = 3): Promise<{ lat: number; lng: number }> => {
+  return new Promise((resolve, reject) => {
+    // Check if browser supports geolocation
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by your browser"));
+      return;
+    }
+
+    const attempt = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          if (retries > 0) {
+            retries--;
+
+            setTimeout(() => {
+              attempt();
+            }, 1000);
+          } else {
+            reject(
+              new Error(
+                error.message || "Failed to get location after retries"
+              )
+            );
+          }
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 15000,
+          maximumAge: 60000,
+        }
+      );
+    };
+
+    attempt();
+  });
+};
+
+const handleSubmit = async (e: React.SubmitEvent) => {
+  e.preventDefault();
+
+  try {
+    // Get user's current location
+    const coords = await getLocation();
+
+    // Combine form data with latitude and longitude
+    const payload = {
+      ...form,
+      ...coords,
+    };
+
+    if (editingId) {
+      // Update existing address
+      const { data } = await api.put(
+        `/addresses/${editingId}`,
+        payload
+      );
+
+      setAddresses(data.addresses);
+
+      updateUser({
+        addresses: data.addresses,
+      });
+
+      toast.success("Address updated!");
+    } else {
+      // Add new address
+      const { data } = await api.post(
+        `/addresses`,
+        payload
+      );
+
+      setAddresses(data.addresses);
+
+      updateUser({
+        addresses: data.addresses,
+      });
+
+      toast.success("Address added!");
+    }
+
+    // Clear form after successful request
+    resetForm();
+  } catch (error: any) {
+    toast.error(
+      error.response?.data?.message ||
+        error.message ||
+        "Failed to save address"
+    );
+  }
+};
+
+
 
   const onEditHandler = (add: Address) => {
     setForm({
@@ -46,14 +146,25 @@ const Addresses = () => {
       zip: add.zip,
       isDefault: add.isDefault,
     });
-    setEditingId(add._id);
+    setEditingId(add.id);
     setShowForm(true);
   };
 
-  useEffect(() => {
-    setAddresses(dummyAddressData);
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
+useEffect(() => {
+  api
+    .get("/addresses")
+    .then(({ data }) => {
+      console.log("ADDRESS API RESPONSE:", data);
+
+      setAddresses(data.addresses || []);
+    })
+    .catch((error: any) => {
+      toast.error(error.response?.data?.message || error?.message);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+}, []);
 
   return (
     <div className="min-h-screen bg-app-cream">
@@ -95,7 +206,7 @@ const Addresses = () => {
           <div className="space-y-4">
             {addresses.map((addr) => (
               <AddressCard
-                key={addr._id}
+                key={addr.id}
                 addr={addr}
                 onEditHandler={onEditHandler}
                 setAddresses={setAddresses}

@@ -1,7 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
-import AppLayOut from "./pages/AppLayOut";
+import AppLayOut from "./pages/AppLayout";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductPage from "./pages/ProductPage";
@@ -20,7 +20,7 @@ import AdminDeliveryPartners from "./pages/admin/AdminDeliveryPartners";
 import DeliveryLogin from "./pages/delivery/DeliveryLogin";
 import DeliveryLayout from "./pages/delivery/DeliveryLayout";
 import DeliveryDashboard from "./pages/delivery/DeliveryDashboard";
-import CheckOut from "./pages/CheckOut";
+import CheckOut from "./pages/Checkout";
 
 const App = () => {
   return (

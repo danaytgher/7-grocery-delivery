@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { dummyAddressData } from "../assets/assets";
 import type { Address } from "../types";
 import {
   ArrowLeft,
@@ -14,23 +13,24 @@ import {
 import CheckoutAddress from "../components/Checkout/CheckoutAddress";
 import CheckoutPayment from "../components/Checkout/CheckoutPayment";
 import CheckoutReview from "../components/Checkout/CheckoutReview";
+import toast from "react-hot-toast";
+import api from "../config/api";
+import { useAuth } from "../context/authContex";
+
 
 const CheckOut = () => {
+
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
 
-  const { items, cartTotal } = useCart();
-
-  // Temporary dummy user data
-  const user = {
-    addresses: dummyAddressData,
-  };
-
+  const { items, cartTotal, clearCart } = useCart();
+  const {user} = useAuth()
+ 
   const [step, setStep] = useState("address");
   const [loading, setLoading] = useState(false);
 
   const [address, setAddress] = useState<Address>({
-    _id: "",
+    id: "",
     label: "Home",
     address: "",
     city: "",
@@ -77,7 +77,7 @@ const CheckOut = () => {
 
       if (defaultAddr) {
         setAddress({
-          _id: defaultAddr._id || "",
+          id: defaultAddr.id || "",
           label: defaultAddr.label || "Home",
           address: defaultAddr.address || "",
           city: defaultAddr.city || "",
@@ -91,19 +91,36 @@ const CheckOut = () => {
     }
   }, []);
 
-  const handlePlaceOrder = async () => {
-    try {
-      setLoading(true);
+ const handlePlaceOrder = async () => {
+  setLoading(true);
+  try {
+    const orderData = {
+      items: items.map((item) => ({
+        product: item.product.id,
+        quantity: item.quantity,
+      })),
+      shippingAddress: address,
+      paymentMethod
+    };
 
-      // Place order API will go here later
+    const { data } = await api.post('/orders', orderData);
+    console.log(data);
 
-      navigate("/orders");
-    } catch (error) {
-      console.error("Failed to place order:", error);
-    } finally {
-      setLoading(false);
+    if (data.url) {
+      window.location.href = data.url;
+      return;
     }
-  };
+
+    clearCart();
+    toast.success("Order placed successfully!");
+    navigate(`/orders/${data.order.id}`);
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || error.message);
+  } finally {
+    setLoading(false);
+    scrollTo(0, 0);
+  }
+};
 
   // Empty cart
   if (items.length === 0) {

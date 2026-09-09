@@ -15,25 +15,29 @@ export const getAddresses = async (req: Request, res: Response) => {
 // POST /api/addresses
 
 export const addAddress = async (req: Request, res: Response) => {
-    const {label, address, city, state, zip, isDefault, lat, lng} = req.body;
+    const { label, address, city, state, zip, isDefault, lat, lng } = req.body;
 
-    // Require coordinates
-    if(lat == null || lng == null){
-        return res.status(400).json({ message: "Location coordinates are required. Please allow location access." });
+    if (lat == null || lng == null) {
+        return res.status(400).json({
+            message: "Location coordinates are required. Please allow location access."
+        });
     }
 
     const currentAddresses = await prisma.address.findMany({
-        where: {userId: req.user!.id}
-    })
+        where: { userId: req.user!.id }
+    });
 
     let makeDefault = isDefault;
-    if(currentAddresses.length === 0) makeDefault = true;
 
-    if(makeDefault){
+    if (currentAddresses.length === 0) {
+        makeDefault = true;
+    }
+
+    if (makeDefault) {
         await prisma.address.updateMany({
-            where: {userId: req.user!.id},
-            data: {isDefault: false}
-        })
+            where: { userId: req.user!.id },
+            data: { isDefault: false }
+        });
     }
 
     await prisma.address.create({
@@ -48,14 +52,16 @@ export const addAddress = async (req: Request, res: Response) => {
             lat: Number(lat),
             lng: Number(lng)
         }
-    })
+    });
 
     const addresses = await prisma.address.findMany({
-        where: {userId: req.user!.id},
-        orderBy: {createdAt: "asc"}
-    })
-    res.status(201).json({addAddress})
-}
+        where: { userId: req.user!.id },
+        orderBy: { createdAt: "asc" }
+    });
+
+    // ✅ Return the addresses array
+    res.status(201).json({ addresses });
+};
 // Update address
 // PUT /api/addresses/:id
 export const updateAddress = async (req: Request, res: Response) => {

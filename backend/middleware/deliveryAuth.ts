@@ -11,7 +11,14 @@ const deliveryAuth = async (req: Request, res: Response, next: NextFunction) => 
 
         const token = authHeader.split(" ")[1];
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string, role: string };
+        const decoded = jwt.verify(
+    token,
+    process.env.JWT_SECRET as string
+) as { id: string, role: string };
+
+console.log("TOKEN:", token);
+console.log("DECODED TOKEN:", decoded);
+console.log("PARTNER ID:", decoded.id);
 
         if (decoded.role !== "delivery") {
             return res.status(403).json({ message: "Access denied. Delivery partner only." });

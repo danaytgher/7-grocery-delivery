@@ -14,10 +14,10 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
 import type { Product } from "../types";
-import { dummyProducts } from "../assets/assets";
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
 import DummyReviewsSection from "../assets/DummyReviewsSection";
+import api from "../config/api";
 
 const ProductPage = () => {
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
@@ -31,29 +31,19 @@ const ProductPage = () => {
   const [loading, setLoading] = useState(true);
   const [localQuantity, setLocalQuantity] = useState(1);
 
-  useEffect(() => {
-    setLoading(true);
-    setLocalQuantity(1);
-    window.scrollTo(0, 0);
+ useEffect(() => {
+  setLoading(true);
+  setLocalQuantity(1);
+  window.scrollTo(0, 0);
 
-    const foundProduct = dummyProducts.find((p) => p._id === id);
+  api.get(`/products/${id}`).then(({ data }) => {
+    setProduct(data.product);
+    return api.get(`/products?category=${data.product.category}`);
+  }).then(({ data }) => {
+    setRelatedProducts(data.products.filter((p: Product) => p.id !== id));
+  }).catch(() => navigate("/products")).finally(() => setLoading(false));
 
-    if (foundProduct) {
-      setProduct(foundProduct);
-
-      // Show products from the same category
-      const related = dummyProducts.filter(
-        (p) => p.category === foundProduct.category && p._id !== id
-      );
-
-      setRelatedProducts(related);
-    } else {
-      setProduct(null);
-      setRelatedProducts([]);
-    }
-
-    setLoading(false);
-  }, [id]);
+}, [id, navigate]);
 
   // Loading state
   if (loading) {
@@ -82,7 +72,7 @@ const ProductPage = () => {
 
   // Check if product is already in cart
   const cartItem = items.find(
-    (item) => item.product._id === product._id
+    (item) => item.product.id === product.id
   );
 
   const inCart = !!cartItem;
@@ -95,9 +85,9 @@ const ProductPage = () => {
   const handleMinus = () => {
     if (inCart) {
       if (cartItem.quantity > 1) {
-        updateQuantity(product._id, cartItem.quantity - 1);
+        updateQuantity(product.id, cartItem.quantity - 1);
       } else {
-        removeFromCart(product._id);
+        removeFromCart(product.id);
       }
     } else {
       setLocalQuantity(Math.max(1, localQuantity - 1));
@@ -107,7 +97,7 @@ const ProductPage = () => {
   // Increase quantity
   const handlePlus = () => {
     if (inCart) {
-      updateQuantity(product._id, cartItem.quantity + 1);
+      updateQuantity(product.id, cartItem.quantity + 1);
     } else {
       setLocalQuantity(localQuantity + 1);
     }
@@ -359,7 +349,7 @@ const ProductPage = () => {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 xl:gap-8">
               {relatedProducts.slice(0, 5).map((rp) => (
                 <ProductCard
-                  key={rp._id}
+                  key={rp.id}
                   product={rp}
                 />
               ))}

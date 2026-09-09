@@ -15,7 +15,7 @@ const ProductCard = ({ product }: Props) => {
   
   // Handle clicking the product card
   const handleCardClick = () => {
-    navigate(`/products/${product._id}`);
+    navigate(`/products/${product.id}`);
   };
 
   // Handle clicking the add-to-cart button
@@ -23,6 +23,7 @@ const ProductCard = ({ product }: Props) => {
     e.stopPropagation();
     addToCart(product);
   };
+  
 
   return (
     <div

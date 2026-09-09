@@ -10,6 +10,8 @@ import {
   ChevronRightIcon,
   PackageIcon,
 } from "lucide-react";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 const statusColors: Record<string, string> = {
   Placed: "bg-blue-100 text-blue-700",
@@ -31,13 +33,17 @@ const MyOrders = () => {
   const tabs = ["all", "Placed", "Out for Delivery", "Delivered"];
 
   const fetchOrders = async () => {
-    setLoading(true);
-
-    // Dummy orders for now
-    setOrders(dummyDashboardOrdersData as Order[]);
-
+  setLoading(true)
+  try {
+    const params = activeTab !== "all" ? `?status=${activeTab}` : "";
+    const { data } = await api.get(`/orders${params}`)
+    setOrders(data.orders)
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || error?.message);
+  }finally{
     setLoading(false);
-  };
+  }
+}
 
   useEffect(() => {
     if (searchParams.get("clearCart")) {
@@ -115,8 +121,8 @@ const MyOrders = () => {
 
             {filteredOrders.map((order) => (
               <Link
-                key={order._id}
-                to={`/orders/${order._id}`}
+                key={order.id}
+                to={`/orders/${order.id}`}
                 className="block max-w-4xl bg-white rounded-2xl p-5 hover:shadow transition-all"
               >
 
@@ -126,7 +132,7 @@ const MyOrders = () => {
                   {/* Left side */}
                   <div>
                     <p className="text-sm font-medium text-app-green">
-                      Order #{order._id.slice(-8).toUpperCase()}
+                      Order #{order.id.slice(-8).toUpperCase()}
                     </p>
 
                     <div className="flex items-center gap-2 mt-1">

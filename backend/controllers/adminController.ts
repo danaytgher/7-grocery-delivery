@@ -84,7 +84,10 @@ export const getAdminStats = async (req: Request, res: Response) => {
 };
 
 // Get delivery partners list for admin
-export const getDeliveryPartners = async (req: Request, res: Response) => {
+export const getDeliveryPartners = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const partners = await prisma.deliveryPartner.findMany({
       orderBy: {
@@ -96,7 +99,10 @@ export const getDeliveryPartners = async (req: Request, res: Response) => {
       partners,
     });
   } catch (error: any) {
-    console.error("Get delivery partners error:", error.message);
+    console.error(
+      "Get delivery partners error:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Failed to get delivery partners",
@@ -105,9 +111,18 @@ export const getDeliveryPartners = async (req: Request, res: Response) => {
 };
 
 // Create delivery partner profile
-export const createDeliveryPartner = async (req: Request, res: Response) => {
+export const createDeliveryPartner = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const { name, email, password, phone, vehicleType } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      vehicleType,
+    } = req.body;
 
     // Check required fields
     if (!name || !email || !password || !phone) {
@@ -137,7 +152,10 @@ export const createDeliveryPartner = async (req: Request, res: Response) => {
       partner: safePartner,
     });
   } catch (error: any) {
-    console.error("Create delivery partner error:", error.message);
+    console.error(
+      "Create delivery partner error:",
+      error.message
+    );
 
     res.status(500).json({
       message: "Failed to create delivery partner",
@@ -146,59 +164,115 @@ export const createDeliveryPartner = async (req: Request, res: Response) => {
 };
 
 // Update delivery partner profile
-export const updateDeliveryPartner = async (req: Request, res: Response) => {
+export const updateDeliveryPartner = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const { name, phone, vehicleType, isActive } = req.body;
+    // IMPORTANT: route uses :id
+    const id = String(req.params.id);
 
-    const data: any = {};
+    if (!id || id === "undefined") {
+      return res.status(400).json({
+        message: "Delivery partner ID is required",
+      });
+    }
 
-    if (name) {
+    const {
+      name,
+      phone,
+      vehicleType,
+      isActive,
+    } = req.body;
+
+    const data: {
+      name?: string;
+      phone?: string;
+      vehicleType?: string;
+      isActive?: boolean;
+    } = {};
+
+    if (name !== undefined) {
       data.name = name;
     }
 
-    if (phone) {
+    if (phone !== undefined) {
       data.phone = phone;
     }
 
-    if (vehicleType) {
+    if (vehicleType !== undefined) {
       data.vehicleType = vehicleType;
     }
 
-    // Important: allows both true and false
     if (isActive !== undefined) {
       data.isActive = isActive;
     }
 
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({
+        message: "No fields provided for update",
+      });
+    }
+
     const partner = await prisma.deliveryPartner.update({
       where: {
-        id: req.params.id as string,
+        id,
       },
       data,
     });
 
-    res.json({
+    return res.status(200).json({
+      message: "Delivery partner updated successfully",
       partner,
     });
   } catch (error: any) {
-    console.error("Update delivery partner error:", error.message);
+    console.error(
+      "Update delivery partner error:",
+      error
+    );
 
-    res.status(404).json({
+    return res.status(404).json({
       message: "Partner not found",
     });
   }
 };
 
 // Assign delivery partner to order
-export const assignDeliveryPartner = async (req: Request, res: Response) => {
+export const assignDeliveryPartner = async (
+  req: Request,
+  res: Response
+) => {
   try {
+    // IMPORTANT: route uses :id
+    const id = String(req.params.id);
+
     const { partnerId } = req.body;
+
+    console.log("ORDER ID:", id);
+    console.log("PARTNER ID:", partnerId);
+
+    // Validate order ID
+    if (!id || id === "undefined") {
+      return res.status(400).json({
+        message: "Order ID is missing",
+      });
+    }
+
+    // Validate partner ID
+    if (!partnerId) {
+      return res.status(400).json({
+        message: "Delivery partner ID is required",
+      });
+    }
 
     // Find order
     const order = await prisma.order.findUnique({
       where: {
-        id: req.params.id as string,
+        id,
       },
     });
+
+    console.log("ORDER FOUND:", order);
 
     if (!order) {
       return res.status(404).json({
@@ -207,11 +281,14 @@ export const assignDeliveryPartner = async (req: Request, res: Response) => {
     }
 
     // Find delivery partner
-    const partner = await prisma.deliveryPartner.findUnique({
-      where: {
-        id: partnerId,
-      },
-    });
+    const partner =
+      await prisma.deliveryPartner.findUnique({
+        where: {
+          id: String(partnerId),
+        },
+      });
+
+    console.log("PARTNER FOUND:", partner);
 
     if (!partner) {
       return res.status(404).json({
@@ -220,29 +297,37 @@ export const assignDeliveryPartner = async (req: Request, res: Response) => {
     }
 
     // Generate 6-digit OTP
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otp = String(
+      Math.floor(100000 + Math.random() * 900000)
+    );
 
+    // Current order status
     let status = order.status;
 
-    const history: any[] = Array.isArray(order.statusHistory)
-      ? order.statusHistory
-      : [];
+    // Existing status history
+    const history: any[] =
+      Array.isArray(order.statusHistory)
+        ? order.statusHistory
+        : [];
 
-    // Only change status when order is Placed or Confirmed
-    if (order.status === "Placed" || order.status === "Confirmed") {
+    // Change status
+    if (
+      order.status === "Placed" ||
+      order.status === "Confirmed"
+    ) {
       status = "Assigned";
 
       history.push({
         status: "Assigned",
         note: `Assigned to ${partner.name}`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       });
     }
 
     // Update order
     const updatedOrder = await prisma.order.update({
       where: {
-        id: order.id,
+        id,
       },
       data: {
         deliveryPartnerId: partner.id,
@@ -252,14 +337,20 @@ export const assignDeliveryPartner = async (req: Request, res: Response) => {
       },
     });
 
-    res.json({
+    return res.status(200).json({
+      message: "Delivery partner assigned successfully",
       order: updatedOrder,
     });
   } catch (error: any) {
-    console.error("Assign delivery partner error:", error.message);
+    console.error(
+      "Assign delivery partner error:",
+      error
+    );
 
-    res.status(500).json({
-      message: "Failed to assign delivery partner",
+    return res.status(500).json({
+      message:
+        error?.message ||
+        "Failed to assign delivery partner",
     });
   }
 };
