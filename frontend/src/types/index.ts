@@ -8,7 +8,7 @@ export interface User {
     isAdmin?: boolean;
     createdAt: string;
     updatedAt: string;
-    role: "user" | "admin";
+    
 }
 
 export interface Address {

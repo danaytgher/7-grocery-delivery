@@ -46,8 +46,13 @@ const Navbar = () => {
   // LOGOUT
   // ==============================
   const handleLogout = () => {
+    // Clear authentication state
     logout();
+
+    // Close user menu
     setUserMenuOpen(false);
+
+    // Go to home page
     navigate("/");
   };
 
@@ -72,9 +77,7 @@ const Navbar = () => {
               DESKTOP NAV LINKS
           ============================== */}
           <div className="hidden md:flex items-center gap-6 text-sm text-zinc-600">
-            <Link to="/">
-              Home
-            </Link>
+            <Link to="/">Home</Link>
 
             <Link to="/products">
               Products
@@ -212,13 +215,6 @@ const Navbar = () => {
                         <p className="text-xs text-zinc-500">
                           {user.email}
                         </p>
-
-                        {/* Show role for debugging/confirmation */}
-                        {user.role && (
-                          <p className="text-xs text-zinc-400 mt-1 capitalize">
-                            {user.role}
-                          </p>
-                        )}
                       </div>
                     )}
 
@@ -293,8 +289,7 @@ const Navbar = () => {
                       {/* ==========================
                           ADMIN PANEL
                       ========================== */}
-
-                      {user?.role === "admin" && (
+                      {user?.isAdmin && (
                         <Link
                           to="/admin/products"
                           className="dropdown-link"
@@ -339,4 +334,14 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+
+
+
+
+
+
+
+
 
