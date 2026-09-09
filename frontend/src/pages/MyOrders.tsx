@@ -4,7 +4,6 @@ import type { Order } from "../types";
 import { useSearchParams, Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import Loading from "../components/Loading";
-import { dummyDashboardOrdersData } from "../assets/assets";
 import {
   CalendarIcon,
   ChevronRightIcon,

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import type { Address } from "../types";
-import { dummyAddressData } from "../assets/assets";
 import Loading from "../components/Loading";
 import { MapPinIcon, PlusIcon } from "lucide-react";
 import AddressCard from "../components/AddressCard";
