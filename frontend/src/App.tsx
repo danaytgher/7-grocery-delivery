@@ -1,7 +1,6 @@
 import { Toaster } from "react-hot-toast";
 import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
-import AppLayOut from "./pages/AppLayout";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductPage from "./pages/ProductPage";
@@ -21,6 +20,7 @@ import DeliveryLogin from "./pages/delivery/DeliveryLogin";
 import DeliveryLayout from "./pages/delivery/DeliveryLayout";
 import DeliveryDashboard from "./pages/delivery/DeliveryDashboard";
 import CheckOut from "./pages/Checkout";
+import AppLayout from "./pages/AppLayout";
 
 const App = () => {
   return (
@@ -43,7 +43,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
 
         {/* Main pages - With Navbar/Footer */}
-        <Route path="/" element={<AppLayOut />}>
+        <Route path="/" element={<AppLayout />}>
           <Route index element={<Home />} />
           <Route path="products" element={<Products />} />
           <Route path="products/:id" element={<ProductPage />} />
