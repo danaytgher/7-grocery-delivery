@@ -18,7 +18,7 @@ import api from "../config/api";
 import { useAuth } from "../context/AuthContext";
 
 
-const CheckOut = () => {
+const Checkout = () => {
 
   const navigate = useNavigate();
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "$";
@@ -282,5 +282,5 @@ const CheckOut = () => {
   );
 };
 
-export default CheckOut;
+export default Checkout;
 

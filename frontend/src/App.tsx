@@ -18,9 +18,9 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminDeliveryPartners from "./pages/admin/AdminDeliveryPartners";
 import DeliveryLogin from "./pages/delivery/DeliveryLogin";
 import DeliveryLayout from "./pages/delivery/DeliveryLayout";
-import DeliveryDashboard from "./pages/delivery/DeliveryDashboard";
-import CheckOut from "./pages/Checkout";
+import DeliveryDashboard from "./pages/delivery/DeliveryDashboard";;
 import AppLayout from "./pages/AppLayout";
+import Checkout from "./pages/Checkout";
 
 const App = () => {
   return (
@@ -50,7 +50,7 @@ const App = () => {
           <Route path="search" element={<SearchResults />} />
           <Route path="deals" element={<FlashDeals />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="checkout" element={<CheckOut />} />
+            <Route path="checkout" element={<Checkout />} />
             <Route path="orders" element={<MyOrders />} />
             <Route path="orders/:id" element={<OrderTracking />} />
             <Route path="addresses" element={<Addresses />} />
