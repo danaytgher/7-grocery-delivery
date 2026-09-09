@@ -6,7 +6,7 @@ const addressRouter = express.Router()
 
 addressRouter.get('/', auth, getAddresses)
 addressRouter.post('/', auth, addAddress)
-addressRouter.put('/:_id', auth, updateAddress)
-addressRouter.delete('/:_id', auth, deleteAddress)
+addressRouter.put('/:id', auth, updateAddress)
+addressRouter.delete('/:id', auth, deleteAddress)
 
 export default addressRouter
