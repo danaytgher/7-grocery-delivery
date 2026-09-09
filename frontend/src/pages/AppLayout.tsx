@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
 import CartSidebar from "../components/CartSidebar"
 
-const AppLayout = () => {
+const AppLayOut = () => {
   return (
     <>
       <Banner/>
@@ -19,4 +19,4 @@ const AppLayout = () => {
   )
 }
 
-export default AppLayout
+export default AppLayOut
